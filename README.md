@@ -1,206 +1,216 @@
-# NETWORK-SYNDICATE
-A Post Incident Network Intrusion Detection system for Network Forensic Analysis.
+# NETWORK SYNDICATE
 
-NETSYN is a state-of-the-art Network Intrusion Detection System (NIDS) designed for post-incident forensic analysis of network traffic. Built with Python, NETSYN leverages advanced machine learning, deep packet inspection, and threat intelligence to detect and analyze malicious activities in PCAP files or perform vulnerability scans on URLs. This open-source tool is ideal for cybersecurity professionals, incident responders, and network analysts.
-Features
-NETSYN provides a comprehensive suite of features for network security analysis:
+**Post-Incident NIDS and Automated PCAP/PCAPNG Forensics Tool**
 
-PCAP Analysis:
+## Abstract
 
-Extracts and analyzes packet features (e.g., IP, TCP, UDP, DNS, ICMP, ARP) from PCAP files using Scapy.
-Performs deep packet inspection to identify HTTP sessions, DNS queries, and application-layer data.
-Reconstructs TCP sessions and carves files (e.g., PDF, PNG, JPEG, EXE) from payloads.
-Detects protocol anomalies, session hijacking, and covert channels (e.g., DNS tunneling).
-Generates forensic timelines and visual analytics (e.g., packet length distribution, anomaly timelines, PCA visualizations).
+**NETWORK SYNDICATE** is a full-spectrum network forensics and threat detection system built to process `.pcap` and `.pcapng` files for retrospective analysis of security incidents. It integrates malware detection, threat intelligence enrichment, and machine learning-based anomaly detection to deliver a comprehensive PDF report emulating real-world SOC triage and forensics workflows.
 
+Designed as a final-year capstone project, this tool stands as a practical post-incident analysis framework, applicable for educational, research, and operational cybersecurity environments.
 
-Malware Detection:
+---
 
-Uses signature-based detection for known malware (e.g., Mirai, WannaCry, Zeus) with predefined patterns.
-Applies YARA rules for advanced malware identification.
-Integrates ClamAV for payload scanning and VirusTotal for hash-based threat lookup.
-Analyzes payload entropy to detect encrypted or suspicious traffic.
+## Table of Contents
 
+* [Features](#features)
+* [Architecture](#architecture)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Output](#output)
+* [Technology Stack](#technology-stack)
+* [Future Enhancements](#future-enhancements)
+* [License](#license)
+* [Author](#author)
 
-Machine Learning and Anomaly Detection:
+---
 
-Employs Isolation Forest, XGBoost, LightGBM, and Variational Autoencoders (VAE) for anomaly detection.
-Clusters traffic using DBSCAN and KMeans to identify behavioral outliers.
-Scores threats using ensemble machine learning models for prioritized alerts.
-Detects zero-day threats through advanced behavioral profiling.
+## Features
 
+### 1. Multi-Format Capture Support
 
-Threat Intelligence:
+* Accepts `.pcap`, `.pcapng`, or raw HTTP-based PCAP file URLs.
+* Employs `scapy` and `dpkt` for deep packet dissection.
 
-Integrates AbuseIPDB and AlienVault OTX for IP reputation checks.
-Correlates alerts to identify coordinated attacks using clustering techniques.
-Provides geolocation data for IPs using the geocoder library.
+### 2. Feature-Rich Packet Inspection
 
+* Extracts protocols, flags, TTL, payload lengths, entropy, flow statistics.
+* Reconstructs TCP/UDP session metadata.
 
-Vulnerability Scanning:
+### 3. Statistical and Heuristic Detection
 
-Performs web vulnerability scanning using Nikto for user-provided URLs.
-Generates detailed PDF reports for scan results.
+* Derives packet timing, byte distributions, flow-level entropy.
+* Applies heuristics for potential beaconing and DoS indicators.
 
+### 4. Threat Intelligence Correlation
 
-Reporting:
+* Integrates:
 
-Produces comprehensive PDF reports with executive summaries, security alerts, traffic overviews, and visual analytics.
-Includes QR codes with report metadata and hash for verification.
-Suggests firewall rules (iptables, AWS WAF, Azure, Snort) for mitigation.
+  * **VirusTotal API**: File and hash reputation
+  * **AbuseIPDB**: IP reputation scoring
+  * **AlienVault OTX**: Threat actor and IOC correlations
 
+### 5. Malware Scanning
 
-Additional Features:
+* **YARA** rules for pattern-based detection.
+* **ClamAV (pyclamd)** for known malware fingerprinting.
+* Flags compressed, encrypted, or obfuscated payloads.
 
-Simulates memory artifact analysis to extract strings and pointers from payloads.
-Analyzes network entropy trends and packet timing for covert channel detection.
-Generates a threat correlation matrix for alert analysis.
+### 6. Machine Learning Analysis
 
+* **Unsupervised DBSCAN Clustering** for anomaly discovery.
+* **PCA** for dimensionality reduction and visualization.
+* **LightGBM Classifier** for supervised threat classification.
 
+### 7. Automated Forensics Reporting
 
-Requirements
-System Requirements
+* PDF report includes:
 
-Operating System: Linux (Ubuntu recommended) or Google Colab for cloud-based execution.
-Python Version: Python 3.8 or higher.
-Hardware: Minimum 4GB RAM, 4 CPU cores (8GB RAM and 8 cores recommended for large PCAP files).
-Dependencies: Install required Python packages and system tools as listed below.
+  * Threat summary, alert categories, risk levels
+  * ML outputs with probability scores
+  * IOC lookups and correlated data
+  * Visualization plots (entropy, protocols, PCA clusters)
+  * QR-based cryptographic hash validation
 
-Python Packages
-Install the following packages using pip:
-pip install scapy==2.5.0 cryptography==38.0.4 pandas==2.0.3 numpy==1.25.2 matplotlib==3.7.2 seaborn==0.12.2
-pip install fpdf==1.7.2 scikit-learn==1.3.0 nest_asyncio==1.5.8 dpkt==1.9.8 pyclamd==0.4.0
-pip install yara-python==4.5.1 requests==2.31.0 tensorflow==2.15.0 geocoder==1.38.1 qrcode==7.4.2
-pip install xgboost==2.0.3 lightgbm==4.3.0 tshark==0.7.2 pypsd==0.2.1 pyod==1.1.3
+---
 
-System Tools
-Install the following tools using apt-get (on Ubuntu/Debian):
-sudo apt-get update
-sudo apt-get install -y clamav tshark nikto
-sudo freshclam  # Update ClamAV virus database
+## Architecture
 
-API Keys
-NETSYN integrates with external threat intelligence services. Obtain the following API keys and replace the placeholders in the code:
+```text
+[.pcap / .pcapng / URL Input]
+          |
+[Packet Parsing Engine]
+    - scapy
+    - dpkt
+          |
+[Feature Extraction]
+    - Protocols, IPs, TTL, Payload Sizes, Entropy
+          |
+[Threat Intelligence Layer]
+    - AbuseIPDB, OTX, VirusTotal
+          |
+[Malware Scanning]
+    - YARA Rules, ClamAV Engine
+          |
+[ML & Clustering Layer]
+    - DBSCAN + PCA
+    - LightGBM Classifier
+          |
+[PDF Report Generator]
+    - Visual Charts
+    - QR Code Hashing
+```
 
-AbuseIPDB API Key: For IP reputation checks. Sign up at AbuseIPDB and update the api_key in the abuseipdb_lookup function.
-VirusTotal API Key: For hash-based malware lookup. Register at VirusTotal and update the api_key in the virustotal_lookup function.
-AlienVault OTX API Key: For threat intelligence. Sign up at AlienVault OTX and update the api_key in the otx_lookup function.
+---
 
-Note: The code includes placeholder API keys for demonstration. Replace them with your own keys for production use.
-Additional Notes
+## Installation
 
-The pyod library is optional for ECOD-based anomaly detection. If unavailable, NETSYN falls back to VAE-based detection.
-Google Colab users must upload PCAP files manually and ensure API keys are configured.
-Ensure clamav and nikto are accessible in the system PATH.
+### 1. Clone the repository
 
+```bash
+git clone https://github.com/SOUNDER-RAJ/NETWORK-SYNDICATE.git
+cd NETWORK-SYNDICATE
+```
 
-Install Dependencies:Run the pip and apt-get commands listed in the Requirements section.
+### 2. Install Python Dependencies
 
-Configure API Keys:Update the abuseipdb_lookup, virustotal_lookup, and otx_lookup functions with your API keys.
+```bash
+pip install -r requirements.txt
+```
 
-Run the Script:Execute the main script:
-python netsyn.py
+If `requirements.txt` is not available, manually install:
 
+```bash
+pip install scapy dpkt pandas numpy matplotlib seaborn fpdf \
+            scikit-learn lightgbm yara-python pyclamd \
+            requests nest_asyncio tensorflow
+```
 
+**Note:**
 
-Usage
+* Ensure `ClamAV` is installed and its daemon (`clamd`) is active.
+* YARA must be installed at the system level.
 
-Launch the Program:Run python netsyn.py and choose between:
+---
 
-URL: Scan a website using Nikto.
-PCAP: Analyze a network capture file.
+## Usage
 
+1. Start the notebook:
 
-URL Scanning:
+   ```bash
+   jupyter notebook NETWORK_SYNDICATE.ipynb
+   ```
 
-Enter a URL (e.g., http://ex4mple.com).
-NETSYN runs a Nikto scan and generates a PDF report (NETSYN_Vulnerability_Report.pdf).
+2. Upload or link a `.pcap` / `.pcapng` capture.
 
+3. Follow in-notebook instructions to:
 
-PCAP Analysis:
+   * Parse traffic
+   * Extract features
+   * Run TI and malware scans
+   * Perform ML analysis
+   * Generate `.pdf` report
 
-Upload a PCAP file when prompted (in Google Colab, use the file upload interface).
-NETSYN analyzes the file and generates a detailed PDF report (NETSYN_NIDS_Post_Incident_Report.pdf) with:
-Executive summary (packets analyzed, risk score, top IPs).
-Security alerts (Snort-style with SID, confidence, and threat level).
-Traffic overview (IP counts, protocol distribution, geolocation).
-Attack types (e.g., DDoS, data exfiltration).
-Malware and threat intelligence (YARA, ClamAV, VirusTotal, AbuseIPDB, OTX).
-Behavioral insights (DBSCAN/KMeans outliers, entropy spikes).
-Forensic analysis (carved files, TCP sessions, HTTP sessions).
-Advanced NIDS features (protocol anomalies, session hijacking, covert channels).
-Visual analytics (charts and heatmaps).
+---
 
+## Output
 
+Each run produces:
 
+* `NETWORK_SYNDICATE_REPORT.pdf`
 
-Output:
+The report includes:
 
-Reports are automatically downloaded in Google Colab or saved locally.
-Visualizations (e.g., length_distribution.png, threat_heatmap.png) are included in the report.
+* Detailed threat detection summary
+* IOC correlation outputs
+* Hash-based malware detection results
+* Supervised ML predictions with probabilities
+* PCA and clustering visuals
+* SHA-256 QR code for report integrity
 
+---
 
+## Technology Stack
 
-Example Workflow
-$ python netsyn.py
-Would you like to scan a URL or upload a PCAP file? (Enter 'URL' or 'PCAP'): PCAP
-# Upload 'capture.pcap'
-Report downloaded as 'NETSYN_NIDS_Post_Incident_Report.pdf'
+| Domain                  | Technologies Used                           |
+| ----------------------- | ------------------------------------------- |
+| **Packet Analysis**     | `scapy`, `dpkt`                             |
+| **Data Science**        | `pandas`, `numpy`, `seaborn`, `matplotlib`  |
+| **Machine Learning**    | `LightGBM`, `scikit-learn`, `PCA`, `DBSCAN` |
+| **Threat Intelligence** | `AbuseIPDB`, `VirusTotal`, `AlienVault OTX` |
+| **Malware Detection**   | `yara-python`, `pyclamd`                    |
+| **Reporting**           | `fpdf`, `qrcode`, `hashlib`                 |
+| **Environment**         | Jupyter Notebook (Python 3.10+)             |
 
-Functions
-Core Analysis
+---
 
-extract_features(pcap_file): Extracts packet features (IP, ports, protocols, payloads) from PCAP files.
-detect_anomalies(df): Applies Isolation Forest and XGBoost for anomaly detection.
-advanced_zero_day_detection(df): Uses VAE and ECOD for zero-day threat detection.
-advanced_behavioral_profiling(df): Clusters traffic with DBSCAN and KMeans for outlier detection.
-detect_attack_types(df, arp_count, alerts, tcp_states, flow_stats, ip_pairs): Identifies attack patterns (e.g., DDoS, exfiltration).
-detect_protocol_anomalies(packets, alerts, sid_counter): Detects unusual TCP flags and malformed packets.
-detect_session_hijacking(packets, tcp_states, alerts, sid_counter): Identifies potential session hijacking.
-detect_covert_channels(packets, payloads, alerts, sid_counter): Detects DNS tunneling and other covert channels.
+## Future Enhancements
 
-Malware Detection
+* Add live packet capture module
+* Integrate Streamlit dashboard for interactive analysis
+* Deploy via Docker for platform independence
+* Support multi-user REST API backend
+* Integrate deep learning for time-sequence threat detection
 
-detect_malware(payloads): Matches payloads against known malware signatures.
-yara_scan(payloads): Applies YARA rules for malware identification.
-clamav_scan(payloads): Scans payloads with ClamAV.
-virustotal_lookup(hashes): Checks payload hashes against VirusTotal.
-calculate_entropy(payload): Computes Shannon entropy for payloads.
+---
 
-Threat Intelligence
+## License
 
-abuseipdb_lookup(ip, api_key): Queries AbuseIPDB for IP reputation.
-otx_lookup(ip, api_key): Queries AlienVault OTX for threat intelligence.
-geoip_lookup(ip): Retrieves geolocation data for IPs.
+This project is licensed under the **Apache License 2.0**. See the [LICENSE](./LICENSE) file for details.
 
-Forensic Analysis
+```
+Copyright 2025 Sounder Raj
 
-carve_files_from_payloads(payloads): Extracts files from payloads (e.g., PDF, PNG).
-reconstruct_tcp_sessions(packets): Rebuilds TCP sessions for data analysis.
-deep_packet_inspection(packets): Analyzes HTTP and other application-layer protocols.
-simulate_memory_artifacts(payloads): Extracts strings and pointers from payloads.
-forensic_timeline_analysis(df, alerts): Creates a timeline of events and anomalies.
-network_entropy_analysis(payloads, df): Analyzes entropy trends for suspicious traffic.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Reporting and Visualization
+   http://www.apache.org/licenses/LICENSE-2.0
+```
 
-generate_report(...): Creates a comprehensive PDF report with all findings.
-generate_advanced_visuals(df): Produces visualizations (histograms, heatmaps, PCA).
-nikto_scan(url): Runs Nikto scans and generates a vulnerability report.
+---
 
+## Author
 
-Contributing
-Contributions are welcome! To contribute:
-
-Fork the repository.
-Create a feature branch (git checkout -b feature/new-feature).
-Commit changes (git commit -m 'Add new feature').
-Push to the branch (git push origin feature/new-feature).
-Open a Pull Request.
-
-
-Built with open-source libraries: Scapy, Pandas, Scikit-learn, TensorFlow, YARA, and more.
-Inspired by real-world NIDS and forensic analysis workflows.
-Special thanks to the cybersecurity community for tools like ClamAV, Nikto, and Tshark.
-
-
+**Sounder Raj**
+Final Year B.E. – Information Security
+GitHub: [SOUNDER-RAJ](https://github.com/SOUNDER-RAJ)
