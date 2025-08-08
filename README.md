@@ -207,5 +207,4 @@ You may obtain a copy of the License at
 ## Author
 
 **Sounder Raj**
-Final Year B.E. – Information Security
 GitHub: [SOUNDER-RAJ](https://github.com/SOUNDER-RAJ)
