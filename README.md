@@ -113,11 +113,6 @@ cd NETWORK-SYNDICATE
 
 ### 2. Install Python Dependencies
 
-```bash
-pip install -r requirements.txt
-```
-
-If `requirements.txt` is not available, manually install:
 
 ```bash
 pip install scapy dpkt pandas numpy matplotlib seaborn fpdf \
