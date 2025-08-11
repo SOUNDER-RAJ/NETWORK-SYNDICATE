@@ -352,7 +352,7 @@ def detect_attack_types(df, arp_count, alerts, tcp_states, flow_stats, ip_pairs)
 def hash_payloads(payloads):
     return [(hashlib.md5(p).hexdigest(), hashlib.sha256(p).hexdigest(), hashlib.sha1(p).hexdigest()) for p in payloads[:15]]
 
-def virustotal_lookup(hashes, api_key="1773vv1195bbe96c17ae835f42bae8a049c3a695518e4ff60377dff619ec52e3"):
+def virustotal_lookup(hashes, api_key="YOUR-KEY"):
     if not api_key or api_key == "No KEY Available":
         return ["VirusTotal lookup skipped (no API key provided)"]
     url = "https://www.virustotal.com/api/v3/files/"
@@ -368,7 +368,7 @@ def virustotal_lookup(hashes, api_key="1773vv1195bbe96c17ae835f42bae8a049c3a6955
         time.sleep(15)
     return results if results else ["No malicious hashes found"]
 
-def otx_lookup(ip, api_key="b1a424a464d0e7b7f86f1491c6829046a2cba7b2950b1e8f67eee997647af1ec"):
+def otx_lookup(ip, api_key="YOUR-KEY"):
     if ip in threat_intel_cache:
         return threat_intel_cache[ip]
     url = f"https://otx.alienvault.com/api/v1/indicators/IPv4/{ip}/general"
