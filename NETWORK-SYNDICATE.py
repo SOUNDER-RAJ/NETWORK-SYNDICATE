@@ -232,7 +232,7 @@ def extract_features(pcap_file):
     df = pd.DataFrame(data, columns=["Timestamp", "Source_IP", "Destination_IP", "Protocol", "Packet_Length", "Source_Port", "Destination_Port", "Flags", "TTL", "TOS", "Packet_ID"])
     return df, packets, payloads, arp_count, alerts, tcp_states, flow_stats, timings, ip_pairs
 
-def abuseipdb_lookup(ip, api_key="6c4c9ba572cb06a3f7ff01fdb2cc6a27412d0960474c7b963da588eb66dc7c621a2b63ab9c21df78"):
+def abuseipdb_lookup(ip, api_key="YOUR-KEY"):
     if ip in threat_intel_cache:
         return threat_intel_cache[ip]
     url = f"https://api.abuseipdb.com/api/v2/check?ipAddress={ip}&maxAgeInDays=90"
